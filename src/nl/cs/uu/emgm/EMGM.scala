@@ -1,6 +1,10 @@
 package nl.cs.uu.emgm;
   
 object EMGM {
+
+  /**********************************************8
+   * Iso
+   */
   trait Iso[A,B] {
     def from : A => B
     def to   : B => A
@@ -12,8 +16,11 @@ object EMGM {
     def from = x => x
     def to   = x => x
   }
-  
-  trait Generic [G[_] ] {
+
+  /**********************************************8
+   * Generics
+   */
+  trait Generic  [G[_]]{
     def unit :G[Unit ]
     def int :G[Int ]
     def char :G[Char ]
@@ -22,6 +29,29 @@ object EMGM {
     def view[a,b] : Iso[b,a]=>(=>G[a])=>G[b]
   }
 
+  trait Generic2  {
+    type G[_,_];
+    def unit :G[Unit, Unit ]
+    def int :G[Int, Int ]
+    def char :G[Char, Char ]
+    def plus [a1,a2,b1,b2] :G[a1, a2]=>G[b1, b2]=>G[Either [a1,b1], Either [a2, b2] ]
+    def prod [a1,a2,b1,b2] :G[a1, a2]=>G[b1, b2]=>G[(a1,b1),(a2,b2)]
+    def view[a1,a2,b1,b2] : Iso[b1,a1]=>Iso[b2,a2]=>(=>G[a1, a2])=>G[b1 ,b2]
+  }
+
+  trait Generic3 [G[_,_,_] ] {
+
+    def unit :G[Unit, Unit,Unit ]
+    def int :G[Int, Int, Int ]
+    def char :G[Char, Char, Char ]
+    def plus [a1,a2,a3,b1,b2,b3] :G[a1, a2, a3]=>G[b1, b2, b3]=>G[Either [a1,b1], Either [a2, b2], Either [a3, b3] ]
+    def prod [a1,a2,a3,b1,b2,b3] :G[a1, a2, a3]=>G[b1, b2, b3]=>G[(a1,b1),(a2,b2),(a3,b3)]
+    def view[a1,a2,a3,b1,b2,b3] : Iso[b1,a1]=>Iso[b2,a2]=>Iso[b3,a3]=>(=>G[a1, a2, a3])=>G[b1 ,b2, b3]
+  }
+
+  /**********************************************8
+   * Rep
+   */
   trait Rep[T ] {
     def accept [g[_] ] (implicit gen :Generic [g]) : g[T ]
   }
@@ -47,9 +77,20 @@ object EMGM {
     def accept [g[_] ] (implicit gen :Generic [g]) =
       gen.prod (a.accept [g] (gen)) (b.accept [g] (gen))
   }
-  
-  case class Count [A] (count :A=>Int)
-  trait CountG extends Generic [Count ] {
+
+  /**********************************************8
+   * Rep 2
+   */
+
+  /**********************************************8
+   * Rep 3
+   */
+
+
+  implicit def bla = 0;
+  case class Count [A] (count :A=>Int) (implicit bla:Int)
+  // type G1[a] = Generic3[a,(),()]   ;
+  trait CountG extends Generic[Count] {
     def unit = Count (x=>0)
     def int = Count (x=>0)
     def char = Count (x=>0)
