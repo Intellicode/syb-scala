@@ -20,7 +20,7 @@ object EMGM {
   /**********************************************8
    * Generics
    */
-  trait Generic  [G[_]]{
+  trait Generic  [G[_]] {
     def unit :G[Unit ]
     def int :G[Int ]
     def char :G[Char ]
@@ -29,8 +29,7 @@ object EMGM {
     def view[a,b] : Iso[b,a]=>(=>G[a])=>G[b]
   }
 
-  trait Generic2  {
-    type G[_,_];
+  trait Generic2 [G[_,_]] {
     def unit :G[Unit, Unit ]
     def int :G[Int, Int ]
     def char :G[Char, Char ]
@@ -79,14 +78,34 @@ object EMGM {
   }
 
   /**********************************************8
-   * Rep 2
+   * FRep
    */
+  trait FRep[F[_]] {
+    def accept [a,g[_]] (ra : g[a]) (implicit gen : Generic [g]) : g [F[a]]
+  }
 
   /**********************************************8
-   * Rep 3
+   * FRep2
    */
+  trait FRep2[F[_]] {
+    //not sure if this is the correct type since F is not bound to the types of g
+    def accept [a,b,g[_,_]] (rab : g[a,b]) (implicit gen : Generic2 [g]) : g [F[a],F[b]]
+  }
+  
+  /**
+   * BiFRep 2
+   */
+  trait BiFRep2[F[_,_]] {
+    def accept [a,b,c,d,g[_,_]] (rab : g[a,b]) (rcd : g[c,d]) (implicit gen : Generic2 [g]) : g [F[a,c],F[b,d]]
+  }
 
-
+  /** 
+   * FRep3
+   */
+  trait FRep3[F[_]] {
+    def accept [a,b,c,g[_,_,_]] (rabc : g[a,b,c]) (implicit gen : Generic3 [g]) : g[F[a],F[b],F[c]]
+  }
+  
   implicit def bla = 0;
   case class Count [A] (count :A=>Int) (implicit bla:Int)
   // type G1[a] = Generic3[a,(),()]   ;
