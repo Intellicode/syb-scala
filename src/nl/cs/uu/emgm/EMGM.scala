@@ -67,14 +67,14 @@ object EMGM {
     def accept [g[_]:Generic ] = implicitly[Generic[g]].char
   }
 
-  implicit def RPlus [a,b] (implicit a :Rep[a],b :Rep[b]) = new Rep[Either [a,b] ] {
+  implicit def RPlus [a:Rep,b:Rep]  = new Rep[Either [a,b] ] {
     def accept [g[_]:Generic ] =
-      implicitly[Generic[g]].plus (a.accept [g] (implicitly[Generic[g]])) (b.accept [g] (implicitly[Generic[g]]))
+      implicitly[Generic[g]].plus ( implicitly[Rep[a]].accept [g] (implicitly[Generic[g]]))  ( implicitly[Rep[b]].accept [g] (implicitly[Generic[g]]))
   }
 
-  implicit def RProd [a,b] (implicit a :Rep[a],b :Rep[b]) = new Rep[(a,b)] {
+  implicit def RProd [a:Rep,b:Rep] = new Rep[(a,b)] {
     def accept [g[_]:Generic ]  =
-      implicitly[Generic[g]].prod (a.accept [g] (implicitly[Generic[g]])) (b.accept [g] (implicitly[Generic[g]]))
+      implicitly[Generic[g]].prod ( implicitly[Rep[a]].accept [g] (implicitly[Generic[g]])) (implicitly[Rep[b]].accept [g] (implicitly[Generic[g]]))
   }
 
   /**********************************************8
