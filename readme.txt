@@ -11,10 +11,11 @@ Goals
  - Write an instance for FRep and automatically have access to FRep2 and FRep3
  - Improve the collect function
  - Solve partial type  application
+   - http://michid.wordpress.com/2008/07/30/meta-programming-with-scala-part-ii-multiplication/#comment-69
    - http://michid.wordpress.com/2008/08/27/meta-programming-with-scala-part-iii-partial-function-application/
    for instance this is not possible:
    case class Collect[A,B] (selCollect:A=>List[B])
-   trait CollectG[B] extends Generic[Collect] {
+   trait CollectG extends Generic[Collect] {
       //def unit = Collect
    }
 
