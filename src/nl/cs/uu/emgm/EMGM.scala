@@ -52,36 +52,36 @@ object EMGM {
    * Rep
    */
   trait Rep[T ] {
-    def accept [g[_] ] (implicit gen :Generic [g]) : g[T ]
+    def accept [g[_]:Generic  ] : g[T ]
   }
 
   implicit def RUnit = new Rep[Unit ] {
-    def accept [g[_] ] (implicit gen :Generic [g]) = gen.unit
+    def accept [g[_]:Generic ] = implicitly[Generic[g]].unit
   }
 
   implicit def RInt = new Rep[Int ] {
-    def accept [g[_] ] (implicit gen :Generic [g]) = gen.int
+    def accept [g[_]:Generic ] = implicitly[Generic[g]].int
   }
 
   implicit def RChar = new Rep[Char ] {
-    def accept [g[_] ] (implicit gen :Generic [g]) = gen.char
+    def accept [g[_]:Generic ] = implicitly[Generic[g]].char
   }
 
-  implicit def RPlus [a,b] (implicit a :Rep[a],b :Rep[b]) = new Rep[Either [a,b] ] {
-    def accept [g[_] ] (implicit gen :Generic [g]) =
-      gen.plus (a.accept [g] (gen)) (b.accept [g] (gen))
+  implicit def RPlus [a:Rep,b:Rep]  = new Rep[Either [a,b] ] {
+    def accept [g[_]:Generic ] =
+      implicitly[Generic[g]].plus ( implicitly[Rep[a]].accept [g] (implicitly[Generic[g]]))  ( implicitly[Rep[b]].accept [g] (implicitly[Generic[g]]))
   }
 
-  implicit def RProd [a,b] (implicit a :Rep[a],b :Rep[b]) = new Rep[(a,b)] {
-    def accept [g[_] ] (implicit gen :Generic [g]) =
-      gen.prod (a.accept [g] (gen)) (b.accept [g] (gen))
+  implicit def RProd [a:Rep,b:Rep] = new Rep[(a,b)] {
+    def accept [g[_]:Generic ]  =
+      implicitly[Generic[g]].prod ( implicitly[Rep[a]].accept [g] (implicitly[Generic[g]])) (implicitly[Rep[b]].accept [g] (implicitly[Generic[g]]))
   }
 
   /**********************************************8
    * FRep
    */
   trait FRep[F[_]] {
-    def accept [a,g[_]] (ra : g[a]) (implicit gen : Generic [g]) : g [F[a]]
+    def accept [a,g[_]:Generic] (ra : g[a]) : g [F[a]]
   }
 
   /**********************************************8
@@ -89,21 +89,21 @@ object EMGM {
    */
   trait FRep2[F[_]] {
     //not sure if this is the correct type since F is not bound to the types of g
-    def accept [a,b,g[_,_]] (rab : g[a,b]) (implicit gen : Generic2 [g]) : g [F[a],F[b]]
+    def accept [a,b,g[_,_]:Generic2] (rab : g[a,b]) : g [F[a],F[b]]
   }
   
   /**
    * BiFRep 2
    */
   trait BiFRep2[F[_,_]] {
-    def accept [a,b,c,d,g[_,_]] (rab : g[a,b]) (rcd : g[c,d]) (implicit gen : Generic2 [g]) : g [F[a,c],F[b,d]]
+    def accept [a,b,c,d,g[_,_]:Generic2] (rab : g[a,b]) (rcd : g[c,d]) : g [F[a,c],F[b,d]]
   }
 
   /** 
    * FRep3
    */
   trait FRep3[F[_]] {
-    def accept [a,b,c,g[_,_,_]] (rabc : g[a,b,c]) (implicit gen : Generic3 [g]) : g[F[a],F[b],F[c]]
+    def accept [a,b,c,g[_,_,_]:Generic3] (rabc : g[a,b,c]): g[F[a],F[b],F[c]]
   }
   
   implicit def bla = 0;
