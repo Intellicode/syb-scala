@@ -41,11 +41,11 @@ object syb3 {
    /* def forallBC[W[_]] = new ForallBC[W] {
          def apply[B,C](w:W[B=>C], x : B) (implicit dt : Data[ctx,B]) : W[C] = w(x)
     }*/
-      trait ForallG[W[_]] {
+    /*  trait ForallG[W[_]] {
         def apply[G](g :G) : W[G] = {
             x=>g(x)
         }
-    }
+    }*/
     
    // def gold[A,W[_]] = 
     
