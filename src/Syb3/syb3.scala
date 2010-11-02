@@ -3,9 +3,28 @@ package Syb3;
 
 object syb3 {
   // Example where run-time composition of traits would be handy!
+  
+  
   trait Data[ctx[_],a] {
     self : ctx[a] =>
     def me = self
+    
+    trait ForallBC[W[_]] {
+         def apply[B,C](w:W[B=>C], x : B) (implicit dt : Data[ctx,B]) : W[C]
+    }
+    
+    trait ForallG[W[_]] {
+        def apply[G](g :G) : W[G]
+    }
+    /**
+     gfoldl :: Proxy ctx
+            -> (forall b c. Data ctx b => w (b -> c) -> b -> w c)
+            -> (forall g. g -> w g)
+            -> a -> w a
+    */
+    
+    def gfold[A,W[_]]: ForallBC[W]=>ForallG[W] =>  A => W[A]
+    
     
     def gmapQ[r] : {def apply[b](x : b)(implicit dt : Data[ctx,b]) : r} => a => List[r]
   }
@@ -19,10 +38,23 @@ object syb3 {
   abstract case class DataList[ctx[_],a](implicit d : Data[ctx,a]) extends Data[ctx,List[a]] {
     self : ctx[List[a]] =>
     
+   /* def forallBC[W[_]] = new ForallBC[W] {
+         def apply[B,C](w:W[B=>C], x : B) (implicit dt : Data[ctx,B]) : W[C] = w(x)
+    }*/
+      trait ForallG[W[_]] {
+        def apply[G](g :G) : W[G] = {
+            x=>g(x)
+        }
+    }
+    
+   // def gold[A,W[_]] = 
+    
     def gmapQ[r] = f => {
         case Nil    => Nil
         case x::xs  => List(f(x)(d),f(xs)(this))
     }
+    
+    
   }
   
   trait Size[a] extends Data[Size,a] {
@@ -30,15 +62,15 @@ object syb3 {
       1 + sum(gmapQ[Int] (new {def apply[b](x:b)(implicit dt : Data[Size,b]) = dt.me.gsize(x)})(t))
   }
   
-  abstract case class SizeList[a]()(implicit d : Size[a]) extends DataList[Size,a]()(d) with Size[List[a]] {
+ /* abstract case class SizeList[a]()(implicit d : Size[a]) extends DataList[Size,a]()(d) with Size[List[a]] {
     override def gsize = {
       case Nil => 0
       case x::xs => d.gsize(x) + gsize(xs)
     } 
-  }
+  } */
   
   // inconvenient: Have to repeat code per each generic function.
-  implicit def sizeChar : Size[Char] = 
+/*  implicit def sizeChar : Size[Char] = 
     new DataChar[Size]() with Size[Char] 
   
   def alternativeList[a](implicit d : Size[a]) : Size[List[a]] = 
@@ -46,7 +78,7 @@ object syb3 {
   
   implicit def sizeList2[a](implicit d : Size[a]) : Size[List[a]] = 
     new SizeList[a]()(d) with Size[List[a]]
-  
+  */
   // The following is not possible.
   
   /*
