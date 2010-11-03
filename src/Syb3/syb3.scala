@@ -23,11 +23,13 @@ object syb3 {
             -> a -> w a
     */
     
-    def gfold[A,W[_]]: ForallBC[W]=>ForallG[W] =>  A => W[A]
+    def gfold[A,W[_]](f: ForallBC[W], k :ForallG[W], a:A):W[A]
     
     
     def gmapQ[r] : {def apply[b](x : b)(implicit dt : Data[ctx,b]) : r} => a => List[r]
   }
+  
+  
 
   abstract case class DataChar[ctx[_]]() extends Data[ctx,Char] {
     self : ctx[Char] =>
@@ -49,9 +51,10 @@ object syb3 {
     
    // def gold[A,W[_]] = 
     
-    def gmapQ[r] = f => {
+    /*def gmapQ[r] = f => {
         case Nil    => Nil
         case x::xs  => List(f(x)(d),f(xs)(this))
-    }  
+        case _ => Nil
+    }  */
   }
 }

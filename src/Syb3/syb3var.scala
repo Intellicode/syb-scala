@@ -23,6 +23,7 @@ object syb3var {
       f => {
         case Nil    => Nil
         //case x::xs  => f.apply(x)(d) :: f.apply(xs)(this)
+        case _ => Nil
       }
   }
   

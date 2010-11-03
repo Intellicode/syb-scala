@@ -1,7 +1,8 @@
-package syb3;
+package Syb3
+import syb3._
 object Sample {
-	trait Dept {}
-	case class D (manager:Manager,employees:List[Employee]) extends Dept
+	trait Department {}
+	case class D (manager:Manager,employees:List[Employee]) extends Department
 	trait Employee {}
 	case class E (name:Name, salary:Salary) extends Employee
 	type Salary = Double
@@ -13,4 +14,15 @@ object Sample {
 							        E("Achilles",2000.0),
 							        E("Odysseus",3000.0)
 							))
+							
+  abstract case class DataDepartment[ctx[_]]() extends Data[ctx,Department] {
+  	 self : ctx[Department] =>
+  }
+  
+  abstract case class DataEmployee[ctx[_]]() extends Data[ctx,Employee] {
+  	 self : ctx[Employee] =>
+  	 
+  	 
+  }
+  
 }
