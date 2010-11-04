@@ -1,9 +1,15 @@
 package Syb3
 import syb3._
 object Sample {
+	trait EmptyType
+	case class Empty()() extends EmptyType
+	case class Simple(a:Int,b:Int) extends EmptyType
+	//case class
+	
 	trait Department {}
 	case class D (manager:Manager,employees:List[Employee]) extends Department
 	trait Employee {}
+	
 	case class E (name:Name, salary:Salary) extends Employee
 	type Salary = Double
 	type Manager = Employee
@@ -14,15 +20,37 @@ object Sample {
 							        E("Achilles",2000.0),
 							        E("Odysseus",3000.0)
 							))
-							
-  abstract case class DataDepartment[ctx[_]]() extends Data[ctx,Department] {
-  	 self : ctx[Department] =>
-  }
-  
-  abstract case class DataEmployee[ctx[_]]() extends Data[ctx,Employee] {
-  	 self : ctx[Employee] =>
-  	 
-  	 
-  }
-  
+	case class DataEmptyType() extends Data[EmptyType] {
+		override def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
+  	 		a match {
+  	 			case Empty() => z(Empty())
+  	 			case Simple(a,b) => {
+  	 				def currySimple:Int=>Int=> EmptyType = a=>b=>Simple(a,b)
+  	 					k(k(z(currySimple),a),b) 
+  	 				} 
+  	 		} 	
+  	 	}
+	}		
+				
+	case class DataDepartment() extends Data[Department] {
+  	 	override def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Department):W[Department] = {
+  	 		a match {
+  	 			case D(manager, employees) => {
+  	 					def curryD:Manager => List[Employee] => Department = manager=>employees=>D(manager, employees)
+  	 					k(k(z(curryD),manager),employees)
+  	 				}
+  	 		} 	
+  	 	}
+  	}
+  	
+  	case class DataEmployee() extends Data[Employee] {
+  	 	override def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Employee):W[Employee] = {
+  	 		a match {
+  	 			case E(name, salary) => {
+  	 					def curryE:Name => Salary => Employee = name=>salary=>E(name, salary)
+  	 					k(k(z(curryE),name),salary)
+  	 				}
+  	 		} 	
+  	 	}
+  	}
 }
