@@ -1,5 +1,6 @@
 package Syb3
 import syb3._
+
 object Sample {
 	trait EmptyType
 	case class Empty()() extends EmptyType
@@ -21,7 +22,7 @@ object Sample {
 							        E("Odysseus",3000.0)
 							))
 	case class DataEmptyType() extends Data[EmptyType] {
-		override def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
+		 def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
   	 		a match {
   	 			case Empty() => z(Empty())
   	 			case Simple(a,b) => {
@@ -33,7 +34,7 @@ object Sample {
 	}		
 				
 	case class DataDepartment() extends Data[Department] {
-  	 	override def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Department):W[Department] = {
+  	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Department):W[Department] = {
   	 		a match {
   	 			case D(manager, employees) => {
   	 					def curryD:Manager => List[Employee] => Department = manager=>employees=>D(manager, employees)
@@ -44,7 +45,7 @@ object Sample {
   	}
   	
   	case class DataEmployee() extends Data[Employee] {
-  	 	override def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Employee):W[Employee] = {
+  	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Employee):W[Employee] = {
   	 		a match {
   	 			case E(name, salary) => {
   	 					def curryE:Name => Salary => Employee = name=>salary=>E(name, salary)
@@ -53,4 +54,19 @@ object Sample {
   	 		} 	
   	 	}
   	}
+
+    case class DataList[T]() extends Data[List[T]] {
+      def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
+        a match {
+          case Nil     => z(Nil)
+          case x :: xs => {
+            def curryCons : T => List[T] => List[T] = x => xs => (x :: xs)
+            k(k(z(curryCons),x),xs)
+          }
+        } 
+      }
+    }
+
+    implicit def hole = DataEmployee()
+
 }
