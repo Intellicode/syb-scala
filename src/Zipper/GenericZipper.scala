@@ -95,5 +95,4 @@ object test {
   val k = LeftUnit(curryCons)
   val z = leftCons (LeftUnit(curryCons[Int])) (0)
 
-  
 }

@@ -21,7 +21,10 @@ object Sample {
 							        E("Achilles",2000.0),
 							        E("Odysseus",3000.0)
 							))
-	case class DataEmptyType() extends Data[EmptyType] {
+	
+	
+							
+	trait DataEmptyType extends Data[EmptyType] {
 		 def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
   	 		a match {
   	 			case Empty() => z(Empty())
@@ -33,7 +36,7 @@ object Sample {
   	 	}
 	}		
 				
-	case class DataDepartment() extends Data[Department] {
+	trait DataDepartment extends Data[Department] {
   	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Department):W[Department] = {
   	 		a match {
   	 			case D(manager, employees) => {
@@ -44,7 +47,7 @@ object Sample {
   	 	}
   	}
   	
-  	case class DataEmployee() extends Data[Employee] {
+  	trait DataEmployee extends Data[Employee] {
   	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Employee):W[Employee] = {
   	 		a match {
   	 			case E(name, salary) => {
@@ -55,7 +58,7 @@ object Sample {
   	 	}
   	}
 
-    case class DataList[T]() extends Data[List[T]] {
+    trait DataList[T] extends Data[List[T]] {
       def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
         a match {
           case Nil     => z(Nil)
@@ -67,4 +70,8 @@ object Sample {
       }
     }
 
+	implicit object dataEmptyType extends DataEmptyType
+	implicit object dataDepartment extends DataDepartment
+	implicit object dataEmployee extends DataEmployee
+	implicit object dataList extends DataList[Int]
 }
