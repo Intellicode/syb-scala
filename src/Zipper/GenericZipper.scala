@@ -29,11 +29,11 @@ object test {
 
   abstract class Right[provides, parent]
   case class RightUnit[parent,provides] () extends Right[provides, parent]
-  //case class RightCons[provides, parent, A, T, B : Data](b : B, f : Right[A,T]) extends Right[provides, parent]
+  case class RightCons[A, T, B : Data](b : B, f : Right[A,T]) extends Right[B => A, T]
 
   abstract class Context[hole,root]
   case class CtxtUnit[hole, root] () extends Context[hole,root]
-  //case class ConsCtxt[hole, root, parent : Data, rights] (left : Left[hole => rights], right : Right[rights, parent], ctxt : Context[parent, root])
+  case class CtxtCons[hole, root, parent : Data, rights] (left : Left[hole => rights], right : Right[rights, parent], ctxt : Context[parent, root]) extends Context[hole,root]
   
   //context bound, implicit
   abstract class Zipper [root]
@@ -51,8 +51,8 @@ object test {
   //def toLeft [X] (a : Data[X]) : Left[X] = Nothing
   
   
-
-  def toLeft [EXPECTS,X] (a : X) (implicit data : Data[X]) : Left[X] = {
+/*
+  def toLeft [X] (a : X) (implicit data : Data[X]) : Left[X] = {
     def leftUnit = new ForallG[Left] {
       def apply[G](g : G) : Left[G] = LeftUnit(g)
     }
@@ -61,7 +61,68 @@ object test {
     }
     data.gfold(leftCons, leftUnit, a)
   }
+*/
 
+  def toLeft [X : Data] (a : X) : Left[X] = {
+    def leftUnit = new ForallG[Left] {
+      def apply[G](g : G) : Left[G] = LeftUnit(g)
+    }
+    def leftCons = new ForallBC[Left] {
+      def apply[B,C](w:Left[B=>C], x : B)  : Left[C] = LeftCons(w, x)
+    }
+    (implicitly[Data[X]]).gfold(leftCons, leftUnit, a)
+  }
+
+/*
+left  :: Zipper a -> Maybe (Zipper a)
+left (Zipper _ CtxtNull) = Nothing
+left (Zipper _ (CtxtCons (LeftUnit _) _ _)) = Nothing
+left (Zipper h (CtxtCons (LeftCons l h') r c)) =
+  Just (Zipper h' (CtxtCons l (RightCons h r) c))
+*/
+
+/*
+  def left[A : Data] (z : Zipper [A]) : Option[Zipper[A]] = {
+    z match {
+      case ZipperC(_, CtxtUnit()) => None
+      case ZipperC(_, CtxtCons(LeftUnit(_), _, _)) => None
+      case ZipperC(h1, (CtxtCons(LeftCons(l,h2),r,c))) =>
+        Some(ZipperC(h2, (CtxtCons(l, RightCons(h1,r)(implicitly[Data[?]]), c)))(implicitly[Data[?]]))
+    }
+  }
+*/
+
+  def left[X : Data, A] (z : ZipperC [X,A]) : Option[ZipperC[X,A]] = {
+    z match {
+      case ZipperC(_, CtxtUnit()) => None
+      case ZipperC(_, CtxtCons(LeftUnit(_), _, _)) => None
+      case ZipperC(h1, (CtxtCons(LeftCons(l,h2),r,c))) =>
+        Some(ZipperC(h2, (CtxtCons(l, RightCons(h1,r)(implicitly[Data[X]]), c)))(implicitly[Data[X]]))
+    }
+  }
+
+
+/*
+-- | Move right.  Returns 'Nothing' iff already at rightmost sibling.
+right :: Zipper a -> Maybe (Zipper a)
+right (Zipper _ CtxtNull) = Nothing
+right (Zipper _ (CtxtCons _ RightNull _)) = Nothing
+right (Zipper h (CtxtCons l (RightCons h' r) c)) =
+  Just (Zipper h' (CtxtCons (LeftCons l h) r c))
+*/
+/*
+  def down[A] (z : Zipper [A]) : Option[Zipper[A]] = {
+    z match {
+      case ZipperC(hole,ctx) => {
+        toLeft(hole)(implicitly[Data[_]])
+        None
+      }
+        //toLeft(hole) match {
+          //case (LeftUnit(_)) => None
+        //}
+    }
+  }
+*/
 
   //trait List[T]
   //case class Nil [A] () extends List[A]
