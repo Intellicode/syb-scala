@@ -80,6 +80,7 @@ object test {
 
   val j = LeftUnit(Nil())
   val k = LeftUnit(curryCons)
-  val z = leftCons (LeftUnit(curryCons)) (0)
-  
+  val z = leftCons (LeftUnit(curryCons[Int])) (0)
+  def x[X,Y] = Nil();
+  val a = x
 }
