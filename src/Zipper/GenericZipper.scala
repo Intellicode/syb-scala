@@ -1,7 +1,7 @@
 package Zipper;
 
 import Syb3.syb3._
-//import Syb3.Sample._
+import Syb3.Sample._
 
 object test {
 
@@ -38,13 +38,13 @@ object test {
   //context bound, implicit
   abstract class Zipper [root]
 
-  case class ZipperC[X,root] (h : X, ctxt : Context[X,root]) extends Zipper[root]
+  case class ZipperC[X,root] (h : X, ctxt : Context[X,root])(implicit dt:Data[X]) extends Zipper[root]
   //case class ZipperC[X,root] (h : Data[X], ctxt : Context[Data[X],root]) extends Zipper[root]
 
   //case class ZipperC[root, HOLE] (h : hole, ctxt : Context[hole, root])(implicit hole : Data[HOLE]) extends Zipper[root, hole]
 
   //def toZipper [X, root] (hole : Data[X]) : Zipper [root] = ZipperC(hole,CtxtUnit[Data[X],root]())
-  def toZipper [X, root] (hole : X) : Zipper [root] = ZipperC(hole,CtxtUnit[X,root]())
+  def toZipper [X, root] (hole : X) (implicit dt:Data[X]) : Zipper [root] = ZipperC(hole,CtxtUnit[X,root]()) (dt)
   //def toZipper [root, data : Data] (hole : data): Zipper [root, data] = ZipperC(hole, CtxtUnit()) 
   //def toZipper [root, HOLE] (h : Data[HOLE])(implicit hole : Data[HOLE]): Zipper [root, HOLE] = ZipperC(h, CtxtUnit())(hole)
   
@@ -71,7 +71,7 @@ object test {
   //val t2 = Cons(0, Nil ())
   
   //val h = toZipper(E("Tom",1))
-  val h = toZipper(Nil)
+  val h = toZipper(1 :: Nil)
   
   //def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
   //def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
