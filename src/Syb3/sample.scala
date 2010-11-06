@@ -67,6 +67,4 @@ object Sample {
       }
     }
 
-    implicit def hole = DataEmployee()
-
 }

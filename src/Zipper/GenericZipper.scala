@@ -18,16 +18,16 @@ object test {
   */
 
   case class LeftUnit[EXPECTS](expects : EXPECTS) extends Left[EXPECTS]
-  case class LeftCons[B : Data, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
-
+  //case class LeftCons[B : Data, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
+  case class LeftCons[B, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
 
   abstract class Right[provides, parent]
   case class RightUnit[parent,provides] () extends Right[provides, parent]
-  case class RightCons[provides, parent, A, T, B : Data](b : B, f : Right[A,T]) extends Right[provides, parent]
+  //case class RightCons[provides, parent, A, T, B : Data](b : B, f : Right[A,T]) extends Right[provides, parent]
 
   abstract class Context[hole,root]
   case class CtxtUnit[hole, root] () extends Context[hole,root]
-  case class ConsCtxt[hole, root, parent : Data, rights] (left : Left[hole => rights], right : Right[rights, parent], ctxt : Context[parent, root])
+  //case class ConsCtxt[hole, root, parent : Data, rights] (left : Left[hole => rights], right : Right[rights, parent], ctxt : Context[parent, root])
   
   //context bound, implicit
   abstract class Zipper [root]
@@ -41,7 +41,15 @@ object test {
   def toZipper [X, root] (hole : X) : Zipper [root] = ZipperC(hole,CtxtUnit[X,root]())
   //def toZipper [root, data : Data] (hole : data): Zipper [root, data] = ZipperC(hole, CtxtUnit()) 
   //def toZipper [root, HOLE] (h : Data[HOLE])(implicit hole : Data[HOLE]): Zipper [root, HOLE] = ZipperC(h, CtxtUnit())(hole)
-
+  
+  //def toLeft [X] (a : Data[X]) : Left[X] = Nothing
+  /*
+  def toLeft [EXPECTS,X] (a : Data[X]) : Left[X] = {
+    def leftCons : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
+    def leftUnit : EXPECTS => Left[EXPECTS] = x => LeftUnit(x)
+    a.gfold _ leftCons leftUnit a
+  }
+  */
 /*
   trait List[T] extends Data[T] {
     def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
@@ -67,5 +75,11 @@ object test {
   //val h = toZipper(E("Tom",1))
   val h = toZipper(Nil())
   
+  def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
+  def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
+
+  val j = LeftUnit(Nil())
+  val k = LeftUnit(curryCons)
+  val z = leftCons (LeftUnit(curryCons)) (0)
   
 }
