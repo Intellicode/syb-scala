@@ -1,15 +1,16 @@
 package Syb3;
 object syb3 { 
+
+  trait ForallBC[W[_]] {
+    def apply[B,C](w:W[B=>C], x : B)  : W[C]
+  }
+    
+  trait ForallG[W[_]] {
+    def apply[G](g :G) : W[G]
+  }
+
   trait Data[A] {
     
-    trait ForallBC[W[_]] {
-         def apply[B,C](w:W[B=>C], x : B)  : W[C]
-         
-    }
-    
-    trait ForallG[W[_]] {
-        def apply[G](g :G) : W[G]
-    }
     /**
      gfoldl :: Proxy ctx
             -> (forall b c.  w (b -> c) -> b -> w c)
