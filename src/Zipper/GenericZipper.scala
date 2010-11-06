@@ -17,7 +17,13 @@ object test {
   {def apply[b](x : b)(implicit dt : Data[ctx,b]) : r} => a => List[r]
   */
 
-  case class LeftUnit[EXPECTS](expects : EXPECTS) extends Left[EXPECTS]
+  case class LeftUnit[EXPECTS](expects : EXPECTS) extends Left[EXPECTS] 
+
+/*
+ trait ForallG[W[_]] {
+      def apply[G](g :G) : W[G]
+    }
+*/
   //case class LeftCons[B : Data, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
   case class LeftCons[B, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
 
@@ -43,13 +49,21 @@ object test {
   //def toZipper [root, HOLE] (h : Data[HOLE])(implicit hole : Data[HOLE]): Zipper [root, HOLE] = ZipperC(h, CtxtUnit())(hole)
   
   //def toLeft [X] (a : Data[X]) : Left[X] = Nothing
-  /*
-  def toLeft [EXPECTS,X] (a : Data[X]) : Left[X] = {
-    def leftCons : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
-    def leftUnit : EXPECTS => Left[EXPECTS] = x => LeftUnit(x)
-    a.gfold _ leftCons leftUnit a
+  
+  
+
+  def toLeft [EXPECTS,X] (a : X) (implicit data : Data[X]) : Left[X] = {
+    def leftUnit = new ForallG[Left] {
+      def apply[G](g : G) : Left[G] = LeftUnit(g)
+    }
+    def leftCons = new ForallBC[Left] {
+      def apply[B,C](w:Left[B=>C], x : B)  : Left[C] = LeftCons(w, x)
+    }
+    data.gfold(leftCons, leftUnit, a)
   }
-  */
+
+  
+ 
 /*
   trait List[T] extends Data[T] {
     def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
@@ -65,7 +79,6 @@ object test {
 */
 
   trait List[T]
-
   case class Nil [A] () extends List[A]
   case class Cons [A] (x : A, xs : List[A]) extends List[A]
 
@@ -80,6 +93,7 @@ object test {
 
   val j = LeftUnit(Nil())
   val k = LeftUnit(curryCons)
-  val z = leftCons (LeftUnit(curryCons)) (0)
+  val z = leftCons (LeftUnit(curryCons[Int])) (0)
+
   
 }
