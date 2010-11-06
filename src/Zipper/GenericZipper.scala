@@ -62,37 +62,24 @@ object test {
     data.gfold(leftCons, leftUnit, a)
   }
 
-  
- 
-/*
-  trait List[T] extends Data[T] {
-    def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
-        a match {
-          //case Nil => z(Nil())
-          case Cons (x, xs) => {
-            def curryCons : T => List[T] => List[T] = x => xs => Cons(x, xs)
-            k(k(z(curryCons),x),xs)
-          }
-        } 
-    }
-  }
-*/
 
-  trait List[T]
-  case class Nil [A] () extends List[A]
-  case class Cons [A] (x : A, xs : List[A]) extends List[A]
+  //trait List[T]
+  //case class Nil [A] () extends List[A]
+  //case class Cons [A] (x : A, xs : List[A]) extends List[A]
 
-  val t = Nil()
-  val t2 = Cons(0, Nil ())
+  //val t = Nil()
+  //val t2 = Cons(0, Nil ())
   
   //val h = toZipper(E("Tom",1))
-  val h = toZipper(Nil())
+  val h = toZipper(Nil)
   
-  def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
-  def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
+  //def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
+  //def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
 
-  val j = LeftUnit(Nil())
-  val k = LeftUnit(curryCons)
-  val z = leftCons (LeftUnit(curryCons[Int])) (0)
+  //val j = LeftUnit(Nil())
+  //val k = LeftUnit(curryCons)
+  //val z = leftCons (LeftUnit(curryCons[Int])) (0)
+
+  val k = toLeft (1 :: Nil)
 
 }
