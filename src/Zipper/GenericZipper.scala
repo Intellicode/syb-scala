@@ -93,7 +93,8 @@ right (Zipper h (CtxtCons l (RightCons h' r) c)) =
       case ZipperC(_, CtxtUnit()) => None
       case ZipperC(_, CtxtCons(_, RightUnit(), _)) => None
       case ZipperC(h1, CtxtCons(l, RightCons(h2, r), c)) => {
-        Some(ZipperC(h2, CtxtCons(LeftCons(l,h1), r, c)))
+        //Some(ZipperC(h2, CtxtCons(LeftCons(l,h1), r, c)))
+        None
       }
     }
   }
@@ -162,6 +163,27 @@ down (Zipper hole ctxt) =
         }
       }
     }
+  }
+  
+  def cast[A,B](a:A):Option[B] = {
+    try{
+        val b = a.asInstanceOf[B]
+        Some(b)
+    } catch {
+        case e: Exception => None
+    }
+  }
+  
+  //type GenericQ r = forall a. Data a => a -> r
+  
+  trait GenericQ[R] {
+      def apply[A](a:A):R
+  }
+  
+  def query[A,B](g:GenericQ[B],z:Zipper[A]):B = {
+      z match {
+          case (ZipperC(hole, _)) => g(hole)
+      }
   }
 
   //trait List[T]
