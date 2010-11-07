@@ -23,7 +23,7 @@ object Sample {
 							))
 	
 	
-							
+			/*				
 	trait DataEmptyType extends Data[EmptyType] {
 		 def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
   	 		a match {
@@ -57,21 +57,21 @@ object Sample {
   	 		} 	
   	 	}
   	}
-
+*/
     trait DataList[T] extends Data[List[T]] {
-      def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:List[T]):W[List[T]] = {
+      def gfold[U >: T,W[_]](k: ForallBC[W], z: ForallG[W], a:List[U]):W[List[U]] = {
         a match {
           case Nil     => z(Nil)
           case x :: xs => {
-            def curryCons : T => List[T] => List[T] = x => xs => (x :: xs)
+            def curryCons : U => List[U] => List[U] = x => xs => (x :: xs)
             k(k(z(curryCons),x),xs)
           }
         } 
       }
     }
-
+/*
 	implicit object dataEmptyType extends DataEmptyType
 	implicit object dataDepartment extends DataDepartment
-	implicit object dataEmployee extends DataEmployee
-	implicit object dataList extends DataList[Int]
+	implicit object dataEmployee extends DataEmployee*/
+	//implicit object dataList extends DataList[Int]
 }

@@ -9,7 +9,7 @@ object syb3 {
     def apply[G](g :G) : W[G]
   }
 
-  trait Data[A] {
+  trait Data[+A] {
     
     /**
      gfoldl :: Proxy ctx
@@ -18,6 +18,11 @@ object syb3 {
             -> a -> w a
     */
     
+    def gfold[U >: A, W[_]](k: ForallBC[W], z :ForallG[W], a:U):W[U]
+  }
+/*
+  trait Data[+A] {
     def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:A):W[A]
   }
+*/
 }
