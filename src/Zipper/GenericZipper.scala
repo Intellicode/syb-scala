@@ -31,20 +31,20 @@ object test {
   case class RightUnit[parent,provides] () extends Right[provides, parent]
   case class RightCons[A, T, B : Data](b : B, f : Right[A,T]) extends Right[B => A, T]
 
-  abstract class Context[hole,root]
+  abstract class Context[+hole,root]
   case class CtxtUnit[hole, root] () extends Context[hole,root]
   case class CtxtCons[hole, root, parent : Data, rights] (left : Left[hole => rights], right : Right[rights, parent], ctxt : Context[parent, root]) extends Context[hole,root]
   
   //context bound, implicit
   abstract class Zipper [root]
 
-  case class ZipperC[X:Data,root] (h : X, ctxt : Context[X,root]) extends Zipper[root]
+  case class ZipperC[+X:Data,+root] (h : X, ctxt : Context[X,root]) //extends Zipper[root]
   //case class ZipperC[X,root] (h : Data[X], ctxt : Context[Data[X],root]) extends Zipper[root]
 
   //case class ZipperC[root, HOLE] (h : hole, ctxt : Context[hole, root])(implicit hole : Data[HOLE]) extends Zipper[root, hole]
 
   //def toZipper [X, root] (hole : Data[X]) : Zipper [root] = ZipperC(hole,CtxtUnit[Data[X],root]())
-  def toZipper [X:Data, root] (hole : X)  : Zipper [root] = ZipperC(hole,CtxtUnit[X,root]()) (implicitly[Data[X]])
+  //def toZipper [X:Data, root] (hole : X)  : Zipper [root] = ZipperC(hole,CtxtUnit[X,root]()) (implicitly[Data[X]])
   //def toZipper [root, data : Data] (hole : data): Zipper [root, data] = ZipperC(hole, CtxtUnit()) 
   //def toZipper [root, HOLE] (h : Data[HOLE])(implicit hole : Data[HOLE]): Zipper [root, HOLE] = ZipperC(h, CtxtUnit())(hole)
   
@@ -96,11 +96,12 @@ left (Zipper h (CtxtCons (LeftCons l h') r c)) =
     z match {
       case ZipperC(_, CtxtUnit()) => None
       case ZipperC(_, CtxtCons(LeftUnit(_), _, _)) => None
-      case ZipperC(h1, (CtxtCons(LeftCons(l,h2),r,c))) =>
-        Some(ZipperC(h2, (CtxtCons(l, RightCons(h1,r)(implicitly[Data[X]]), c)))(implicitly[Data[X]]))
+      case ZipperC(h1, CtxtCons(LeftCons(l,h2),r,c)) =>
+//        Some(ZipperC(h2, CtxtCons[H,RO,X,R](l, RightCons(h1,r)(implicitly[Data[X]]), c)(implicitly[Data[X]]))(implicitly[Data[X]]))
+        Some(ZipperC(h2, CtxtUnit[X,A]())(implicitly[Data[X]]))
     }
   }
-
+//CtxtCons[hole, root, parent : Data, rights]
 
 /*
 -- | Move right.  Returns 'Nothing' iff already at rightmost sibling.
@@ -132,7 +133,7 @@ right (Zipper h (CtxtCons l (RightCons h' r) c)) =
   //val t2 = Cons(0, Nil ())
   
   //val h = toZipper(E("Tom",1))
-  val h = toZipper(1 :: Nil)
+  //val h = toZipper(1 :: Nil)
   
   //def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
   //def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)
