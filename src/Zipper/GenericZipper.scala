@@ -8,23 +8,7 @@ object test {
 //  trait Data[A]
 
   abstract class Left[expects]
-
-  /*
-  trait ForallBC[W[_]] {
-           def apply[B,C](w:W[B=>C], x : B) (implicit dt : Data[ctx,B]) : W[C]
-      }
-
-  {def apply[b](x : b)(implicit dt : Data[ctx,b]) : r} => a => List[r]
-  */
-
   case class LeftUnit[EXPECTS](expects : EXPECTS) extends Left[EXPECTS] 
-
-/*
- trait ForallG[W[_]] {
-      def apply[G](g :G) : W[G]
-    }
-*/
-  //case class LeftCons[B : Data, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
   case class LeftCons[B, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
 
   abstract class Right[provides, parent]
@@ -51,17 +35,6 @@ object test {
   //def toLeft [X] (a : Data[X]) : Left[X] = Nothing
   
   
-/*
-  def toLeft [X] (a : X) (implicit data : Data[X]) : Left[X] = {
-    def leftUnit = new ForallG[Left] {
-      def apply[G](g : G) : Left[G] = LeftUnit(g)
-    }
-    def leftCons = new ForallBC[Left] {
-      def apply[B,C](w:Left[B=>C], x : B)  : Left[C] = LeftCons(w, x)
-    }
-    data.gfold(leftCons, leftUnit, a)
-  }
-*/
 
   def toLeft [X : Data] (a : X) : Left[X] = {
     def leftUnit = new ForallG[Left] {
@@ -81,26 +54,36 @@ left (Zipper h (CtxtCons (LeftCons l h') r c)) =
   Just (Zipper h' (CtxtCons l (RightCons h r) c))
 */
 
-/*
-  def left[A : Data] (z : Zipper [A]) : Option[Zipper[A]] = {
-    z match {
-      case ZipperC(_, CtxtUnit()) => None
-      case ZipperC(_, CtxtCons(LeftUnit(_), _, _)) => None
-      case ZipperC(h1, (CtxtCons(LeftCons(l,h2),r,c))) =>
-        Some(ZipperC(h2, (CtxtCons(l, RightCons(h1,r)(implicitly[Data[?]]), c)))(implicitly[Data[?]]))
-    }
-  }
-*/
 
   def left[A] (z : Zipper[A]) : Option[Zipper[A]] = {
     z match {
       case ZipperC(_, CtxtUnit()) => None
       case ZipperC(_, CtxtCons(LeftUnit(_), _, _)) => None
-      case ZipperC(h1, (CtxtCons(LeftCons(l,h2),r,c))) =>
+      case ZipperC(h1, CtxtCons(LeftCons(l,h2),r,c)) =>
         Some(ZipperC(h2, (CtxtCons(l, RightCons(h1,r), c))))
     }
   }
 
+  def right[A] (z:Zipper[A]) : Option[Zipper[A]] = {
+    z match {
+      case ZipperC(_, CtxtUnit()) => None
+      case ZipperC(_, CtxtCons(_, RightUnit(), _)) => None
+      case ZipperC(h1, CtxtCons(l, rightCons, c) ) => {
+            
+            // because scala's type inferencer is too stupid to figure out that
+            // a RightCons is a Right
+            def mkrightCons[A,T,B](a:Right[_,_]):Right[B => A, T] = a.asInstanceOf[Right[B=>A,T]]
+            
+            //because scala's type inferencer is too stupid to figure out that leftcons is a left
+            def mkleft[B,EXPECTS](l:LeftCons[B, EXPECTS]):Left[EXPECTS] = l
+            val r = mkrightCons(rightCons)
+            r match{
+               // case  RightCons(h2, r)=> Some(ZipperC(h2, (CtxtCons(LeftCons(l,h1),r , c)))) 
+               case _ => None
+            }
+          }
+    }
+  }
 
 /*
 -- | Move right.  Returns 'Nothing' iff already at rightmost sibling.
