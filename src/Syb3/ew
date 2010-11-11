@@ -1,0 +1,9 @@
+
+  implicit def RUnit = new Rep[Unit ] {
+    def accept [g[_]:Generic ] = implicitly[Generic[g]].unit
+  }
+  
+  
+  implicit def RUnit = new Rep[Unit ] {
+    def accept [G[_] ](implicit dt:Generic[G]) = dt.unit
+  }

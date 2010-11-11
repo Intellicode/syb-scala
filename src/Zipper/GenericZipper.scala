@@ -5,11 +5,11 @@ import Syb3.Sample._
 
 object test {
 
-  abstract class Left[expects]
+  abstract class Left[+expects]
   case class LeftUnit[EXPECTS](expects : EXPECTS) extends Left[EXPECTS] 
   case class LeftCons[B, EXPECTS](f : Left[B => EXPECTS], b : B) extends Left[EXPECTS]
 
-  abstract class Right[+provides, parent]
+  abstract class Right[+provides, +parent]
   case class RightUnit[provides,parent] () extends Right[provides, parent]
   case class RightCons[A, T, B](b : B, f : Right[A,T]) extends Right[B => A, T]
 
@@ -19,7 +19,6 @@ object test {
   
   //context bound, implicit
   abstract class Zipper [root]
-
   case class ZipperC[X,root] (h : X, ctxt : Context[X,root]) extends Zipper[root]
 
   //case class ZipperC[X,root] (h : Data[X], ctxt : Context[Data[X],root]) extends Zipper[root]
@@ -93,7 +92,12 @@ right (Zipper h (CtxtCons l (RightCons h' r) c)) =
       case ZipperC(_, CtxtUnit()) => None
       case ZipperC(_, CtxtCons(_, RightUnit(), _)) => None
       case ZipperC(h1, CtxtCons(l, RightCons(h2, r), c)) => {
+     	//val le:Left[Any => Any] = l
+      	//val leftCons:LeftCons[Any, Any] = LeftCons(le,h1)
+      	//val leftCons2:Left[Any] = leftCons
+      //	val b = CtxtCons(leftCons, r, c)
         //Some(ZipperC(h2, CtxtCons(LeftCons(l,h1), r, c)))
+        // l*/
         None
       }
     }
@@ -153,7 +157,7 @@ down (Zipper hole ctxt) =
   }
 */
 
-  def down[X] (z : Zipper [X])(implicit d : Data[X]) : Option[Zipper[X]] = {
+  /*def down[X] (z : Zipper [X])(implicit d : Data[X]) : Option[Zipper[X]] = {
     z match {
       case ZipperC(hole1,ctxt) => {
         toLeft(hole1)(d) match {
@@ -163,7 +167,7 @@ down (Zipper hole ctxt) =
         }
       }
     }
-  }
+  }*/
   
   def cast[A,B](a:A):Option[B] = {
     try{
@@ -185,6 +189,23 @@ down (Zipper hole ctxt) =
           case (ZipperC(hole, _)) => g(hole)
       }
   }
+  
+  /*
+  getHole :: (Typeable b) => Zipper a -> Maybe b
+getHole = query cast
+*/
+
+
+def getHole[A,B](z:Zipper[A]):Option[B] = {
+	val cast2= new GenericQ[Option[B]] {
+		def apply[A](a:A):Option[B] ={
+			cast(a)
+		}
+	}
+	query(cast2, z)
+}
+
+
 
   //trait List[T]
   //case class Nil [A] () extends List[A]
@@ -193,8 +214,9 @@ down (Zipper hole ctxt) =
   //val t = Nil()
   //val t2 = Cons(0, Nil ())
   
-  //val h = toZipper(E("Tom",1))
-//  val h = down (toZipper(1 :: Nil))
+  val h = getHole(toZipper(E("Tom",1):Employee))
+  
+ // val h =  toZipper(1 :: Nil)
   
   //def curryCons [T] : T => List[T] => List[T] = x => xs => Cons(x, xs)
   //def leftCons [EXPECTS,X] : Left[X => EXPECTS] => X => Left[EXPECTS] = f => x => LeftCons(f, x)

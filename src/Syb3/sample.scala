@@ -10,7 +10,6 @@ object Sample {
 	trait Department {}
 	case class D (manager:Manager,employees:List[Employee]) extends Department
 	trait Employee {}
-	
 	case class E (name:Name, salary:Salary) extends Employee
 	type Salary = Double
 	type Manager = Employee
@@ -23,7 +22,7 @@ object Sample {
 							))
 	
 	
-			/*				
+/*						
 	trait DataEmptyType extends Data[EmptyType] {
 		 def gfold[W[_]](k: ForallBC[W], z :ForallG[W], a:EmptyType):W[EmptyType] = {
   	 		a match {
@@ -34,10 +33,10 @@ object Sample {
   	 				} 
   	 		} 	
   	 	}
-	}		
+	}*/		
 				
-	trait DataDepartment extends Data[Department] {
-  	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Department):W[Department] = {
+	/*trait DataDepartment extends Data[Department] {
+  	 	 def gfold[U >: Department,W[_]](k: ForallBC[W], z: ForallG[W], a:U):W[U] = {
   	 		a match {
   	 			case D(manager, employees) => {
   	 					def curryD:Manager => List[Employee] => Department = manager=>employees=>D(manager, employees)
@@ -45,33 +44,36 @@ object Sample {
   	 				}
   	 		} 	
   	 	}
-  	}
+  	}*/
   	
   	trait DataEmployee extends Data[Employee] {
+  		//def gfold[U >: A, W[_]](k: ForallBC[W], z :ForallG[W], a:U):W[U]
   	 	 def gfold[W[_]](k: ForallBC[W], z: ForallG[W], a:Employee):W[Employee] = {
   	 		a match {
   	 			case E(name, salary) => {
-  	 					def curryE:Name => Salary => Employee = name=>salary=>E(name, salary)
+  	 					def curryE:Name => Salary => Employee = name=>salary=>E(name, salary):Employee
   	 					k(k(z(curryE),name),salary)
   	 				}
   	 		} 	
   	 	}
-  	}
-*/
-    trait DataList[T] extends Data[List[T]] {
-      def gfold[U >: T,W[_]](k: ForallBC[W], z: ForallG[W], a:List[U]):W[List[U]] = {
+ 	}
+
+   /* trait DataList[+T] extends Data[List[T]] {
+     // def gfold[U >: A, W[_]](k: ForallBC[W], z :ForallG[W], a:U):W[U]
+      def gfold[U >: T,W[_]](k: ForallBC[W], z: ForallG[W], a:U):W[U] = {
         a match {
           case Nil     => z(Nil)
           case x :: xs => {
-            def curryCons : U => List[U] => List[U] = x => xs => (x :: xs)
-            k(k(z(curryCons),x),xs)
+            def curryCons : T => U => U = x => xs => (x :: xs)
+          //  k(k(z(curryCons),x),xs)
+           z(Nil)
           }
         } 
       }
-    }
-/*
-	implicit object dataEmptyType extends DataEmptyType
-	implicit object dataDepartment extends DataDepartment
-	implicit object dataEmployee extends DataEmployee*/
+    }*/
+
+//	implicit object dataEmptyType extends DataEmptyType
+//	implicit object dataDepartment extends DataDepartment
+	implicit object dataEmployee extends DataEmployee
 	//implicit object dataList extends DataList[Int]
 }
